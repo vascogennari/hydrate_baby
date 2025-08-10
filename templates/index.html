@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hydrate baby – Dosage Calculator</title>
+    <style>
+        body {
+            font-family: 'Avenir Next', sans-serif;
+            background: #f4f9ff;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #1159AD;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            margin: 30px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        form input[type="text"] {
+            width: 100%;
+            padding: 10px 10px;  /* 10px top/bottom, 10px left/right */
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;  /* make sure padding included inside width */
+        }
+        form input[type="submit"] {
+            margin-top: 20px;
+            background: #1159AD;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+        form input[type="submit"]:hover {
+            background: #1159AD;
+        }
+        h2 {
+            color: #1159AD;
+        }
+        pre {
+            background: #f0f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        input[type="submit"] {
+            font-weight: bold;
+        }
+</style>
+    </style>
+</head>
+<body>
+    <header>
+    <h1 style="font-size: 1.5em;">hydrate baby - dosage calculator</h1>
+    <h2 style="font-size: 0.8em; font-weight: normal; color: white; margin-top: -10px;">for patients less than 10 kg</h2>
+    </header>
+
+    <div class="container">
+        <form method="post" novalidate>
+            <h2>assess dehydratation</h2>
+            
+            <label>current weight <span style="font-weight: normal;">[kg]</span>
+                <input type="text" name="weight_actual" value="{{ request.form.weight_actual or '5' }}" required>
+            </label>
+
+            <style>
+            .form-row {
+                display: flex;
+                align-items: center;
+                gap: 20px; /* space between inputs */
+            }
+            .form-row > label {
+                flex: 1; /* each label takes equal available space */
+            }
+            label {
+                font-weight: bold;
+            }
+            .unit {
+                font-weight: normal;
+            }
+            </style>
+
+            <h3 style="font-size: 0.8em; margin-top: 30px; margin-bottom: -8px;">insert the normal weight if available, otherwise the dehydratation percentage</h3>
+            <div class="form-row">
+            <label>normal weight <span class="unit">[kg]</span>
+                <input type="text" name="weight_nominal" value="{{ request.form.weight_nominal or '' }}">
+            </label>
+            <label>WHO scale <span class="unit">[%]</span>
+                <input type="text" name="who_scale" value="{{ request.form.who_scale or '' }}">
+            </label>
+            </div>
+
+            <label>current Na concentration <span style="font-weight: normal;">[mEq/l]</span>
+                <input type="text" name="Na_actual" value="{{ request.form.Na_actual or '125' }}" required>
+            </label>
+            <label>current K concentration <span style="font-weight: normal;">[mEq/l]</span>
+                <input type="text" name="K_actual" value="{{ request.form.K_actual or '3' }}" required>
+            </label>
+            <input type="submit" value="calculate" style="font-weight: bold; margin-top: 30px; margin-bottom: 5px">
+        </form>
+
+        {% if error %}
+        <p style="color: #8F3A3A;">{{ error }}</p>
+        {% else %}
+        {% if logs %}
+        <p style="color: black;">{{ logs }}</p>
+        {% endif %}
+        {% endif %}
+
+        {% if result %}
+        <h2>dosage</h2>
+        {% for period, values in result.items() %}
+            <h3>{{ period }}</h3>
+            <ul>
+            <li>
+                solution of:&nbsp;&nbsp;&nbsp;
+                {{ "%.1f"|format(values['total volume']) }} ml + 
+                {{ "%.1f"|format(values['total electrolites Na']) }} ml of Na + 
+                {{ "%.1f"|format(values['total electrolites K']) }} ml of K
+            </li>
+            </ul>
+        {% endfor %}
+        {% endif %}
+
+    </div>
+</body>
+</html>
